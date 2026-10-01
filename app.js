@@ -119,20 +119,31 @@ function render(blocks) {
 
   let lastSpeaker = null;
   document.getElementById("verseList").innerHTML = filtered.map(b => {
-    const showSpeaker = b.speaker && b.speaker !== lastSpeaker;
-    if (b.speaker) lastSpeaker = b.speaker;
-    const languageMeaning = selectedLanguage === "kn" ? knByVerse[b.shlokas[0]?.number] : b.meaning;
+    const firstNumber = b.shlokas[0]?.number;
+    const knBlock = selectedLanguage === "kn"
+      ? languageChapter?.blocks.find(lb => lb.shlokas.some(s => s.number === firstNumber))
+      : null;
+    const speaker = selectedLanguage === "kn" ? (knBlock?.speaker || "") : (b.speaker || "");
+    const showSpeaker = speaker && speaker !== lastSpeaker;
+    if (speaker) lastSpeaker = speaker;
+    const languageMeaning = selectedLanguage === "kn" ? knByVerse[firstNumber] : b.meaning;
 
     return `
     <article class="verse-group">
-      ${showSpeaker ? `<div class="verse-top"><span class="speaker">${esc(b.speaker)}</span></div>` : ""}
+      ${showSpeaker ? `<div class="verse-top"><span class="speaker">${esc(speaker)}</span></div>` : ""}
       <div class="verse-body">
         <div class="sanskrit-group">
-          ${b.shlokas.map(s => `
+          ${b.shlokas.map(s => {
+            const knVerse = selectedLanguage === "kn"
+              ? languageChapter?.blocks.flatMap(lb => lb.shlokas).find(ks => ks.number === s.number)
+              : null;
+            const lines = selectedLanguage === "kn" && knVerse?.lines ? knVerse.lines : (s.lines || []);
+            return `
             <div class="shloka" id="shloka-${s.number}">
               <span class="shloka-number">॥ ${hn(s.number)} ॥</span>
-              <div class="shloka-text">${(s.lines || []).map(line => `<div>${esc(line)}</div>`).join("")}</div>
-            </div>`).join("")}
+              <div class="shloka-text">${lines.map(line => `<div>${esc(line)}</div>`).join("")}</div>
+            </div>`;
+          }).join("")}
         </div>
         <div class="meaning">
           <div class="meaning-label">${t.meaning}</div>
