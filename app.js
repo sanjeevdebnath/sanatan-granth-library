@@ -44,6 +44,15 @@ const chapterTitles = {
   }
 };
 
+function updateReadingFontSizes() {
+  const isMobile = window.matchMedia("(max-width: 700px)").matches;
+  const shlokaSizes = ["1.28rem", "1.42rem", "1.58rem", "1.76rem"];
+  const meaningSizes = isMobile ? ["21px", "23px", "25px", "27px"] : ["18.24px", "20.16px", "22.40px", "24.96px"];
+  document.documentElement.style.setProperty("--reading", shlokaSizes[fontStep]);
+  document.documentElement.style.setProperty("--meaning-size", meaningSizes[fontStep]);
+  document.querySelectorAll(".meaning").forEach(el => el.style.setProperty("font-size", meaningSizes[fontStep], "important"));
+}
+
 async function loadJSON(path) {
   const r = await fetch(path);
   if (!r.ok) throw new Error(path);
@@ -82,6 +91,7 @@ function applyLocale() {
   document.getElementById("prevChapterBtn").textContent = t.prev;
   document.getElementById("nextChapterBtn").textContent = t.next;
   document.getElementById("pagerLabel").textContent = t.pager;
+  document.querySelector("footer").textContent = selectedLanguage === "kn" ? "ಓಂ ನಮಃ ಶಿವಾಯ" : "ॐ नमः शिवाय";
   document.getElementById("chapterTitle").textContent = `${t.chapterLabel} ${selectedLanguage === "hi" ? hn(currentChapter.chapter) : String(currentChapter.chapter).replace(/[0-9]/g, d => ["೦","೧","೨","೩","೪","೫","೬","೭","೮","೯"][Number(d)])}`;
   document.getElementById("chapterDescription").textContent = chapterTitles[selectedLanguage][currentChapter.chapter] || currentChapter.title;
   document.getElementById("menuBtn").setAttribute("aria-label", selectedLanguage === "kn" ? "ಮೆನು ತೆರೆಯಿರಿ" : "मेनू खोलें");
