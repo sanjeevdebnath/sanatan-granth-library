@@ -7,6 +7,8 @@ let selectedLanguage = "hi";
 
 const digits = ["०","१","२","३","४","५","६","७","८","९"];
 const hn = n => String(n).split("").map(x => digits[Number(x)]).join("");
+const knDigits = ["೦","೧","೨","೩","೪","೫","೬","೭","೮","೯"];
+const langNum = n => selectedLanguage === "kn" ? String(n).split("").map(x => knDigits[Number(x)]).join("") : hn(n);
 
 const UI = {
   hi: {
@@ -140,7 +142,7 @@ function render(blocks) {
             const lines = selectedLanguage === "kn" && knVerse?.lines ? knVerse.lines : (s.lines || []);
             return `
             <div class="shloka" id="shloka-${s.number}">
-              <span class="shloka-number">॥ ${hn(s.number)} ॥</span>
+              <span class="shloka-number">॥ ${langNum(s.number)} ॥</span>
               <div class="shloka-text">${lines.map(line => `<div>${esc(line)}</div>`).join("")}</div>
             </div>`;
           }).join("")}
