@@ -1,0 +1,21 @@
+{
+  "sources": [
+    {
+      "id": "hindi-working-edition",
+      "language": "hi",
+      "label": "Hindi working edition",
+      "status": "available",
+      "role": "meaning",
+      "path": "books/shivamahapurana/mahatmya"
+    },
+    {
+      "id": "kannada-shiva-purana",
+      "language": "kn",
+      "label": "ಶ್ರೀ ಶಿವಮಹಾಪುರಾಣ — Kannada edition",
+      "status": "source-attached",
+      "role": "text-and-meaning",
+      "file": "Shiv Puraan Kannada.pdf",
+      "notes": "User-provided scanned edition. The Mahatmya section contains Sanskrit shlokas followed by Kannada explanatory text in sequence. Chapter 1 begins around scanned page 16, chapter 2 around page 30, chapter 3 around page 40, chapter 4 around page 55, chapter 5 around page 66, and chapter 6 around page 81 in the PDF page sequence visible during inspection. Exact verse-to-meaning mapping will be established during transcription rather than inferred from page proximity."
+    }
+  ]
+}
