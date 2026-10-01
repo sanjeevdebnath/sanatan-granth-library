@@ -3,6 +3,7 @@ let currentChapter = null;
 let showMeaning = true;
 let fontStep = 0;
 let selectedLanguage = "hi";
+let selectedLanguage = "hi";
 
 const digits = ["०","१","२","३","४","५","६","७","८","९"];
 const hn = n => String(n).split("").map(x => digits[Number(x)]).join("");
@@ -58,7 +59,7 @@ function render(blocks) {
   }).join("") + (currentChapter.colophon && !q ? `
     <article class="colophon">
       <div class="colophon-sanskrit">${esc(currentChapter.colophon.sanskrit)}</div>
-      ${showMeaning ? `<div class="meaning"><div class="meaning-label">हिन्दी अर्थ</div><div>${esc(currentChapter.colophon.meaning)}</div></div>` : ""}
+      ${showMeaning ? `<div class="meaning"><div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)"}</div><div>${esc(currentChapter.colophon.meaning)}</div></div>` : ""}
     </article>` : "");
 
   updateReadingFontSizes();
@@ -138,6 +139,12 @@ document.getElementById("languageBtn").onclick = () => {
   document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)";
   render(currentChapter.blocks);
 };
+document.getElementById("languageBtn").onclick = () => {
+  selectedLanguage = selectedLanguage === "hi" ? "kn" : "hi";
+  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)";
+  render(currentChapter.blocks);
+};
+
 document.getElementById("meaningBtn").onclick = () => {
   showMeaning = !showMeaning;
   document.getElementById("meaningBtn").classList.toggle("active", showMeaning);
