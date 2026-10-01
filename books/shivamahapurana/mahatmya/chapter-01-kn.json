@@ -1,0 +1,11 @@
+{
+  "chapter": 1,
+  "language": "kn",
+  "status": "source-transcription-draft",
+  "source": "Shiv Puraan Kannada.pdf",
+  "printedPages": "1-15",
+  "pdfPages": "15-29",
+  "verseRange": "1-51",
+  "mapping": "The Sanskrit verses align with the existing Chapter 1 numbering. Kannada prose includes both meaning and additional commentary; it must not be collapsed into a one-to-one translation field without preserving source grouping.",
+  "publicationReady": false
+}
