@@ -10,14 +10,14 @@ const hn = n => String(n).split("").map(x => digits[Number(x)]).join("");
 
 const UI = {
   hi: {
-    lang:"hi", htmlLang:"hi", bookLabel:"पुस्तक", chapterLabel:"अध्याय",
+    lang:"hi", htmlLang:"hi", bookTitle:"शिवमहापुराण", bookLabel:"पुस्तक", chapterLabel:"अध्याय", font:"अ / अ+",
     subtitle:"सरल डिजिटल पाठ", section:"माहात्म्य", search:"इस अध्याय में खोजें…",
     toc:"श्लोक आरम्भ", count:n => `इस अध्याय में ${n} श्लोक`, countSearch:n => `${n} श्लोक मिले`,
     prev:"← पिछला अध्याय", next:"अगला अध्याय →", pager:"पूरा अध्याय एक ही पृष्ठ पर",
     meaning:"हिन्दी अर्थ", unavailable:"इस अध्याय का हिन्दी अर्थ उपलब्ध नहीं है।"
   },
   kn: {
-    lang:"kn", htmlLang:"kn", bookLabel:"ಗ್ರಂಥ", chapterLabel:"ಅಧ್ಯಾಯ",
+    lang:"kn", htmlLang:"kn", bookTitle:"ಶಿವಮಹಾಪುರಾಣ", bookLabel:"ಗ್ರಂಥ", chapterLabel:"ಅಧ್ಯಾಯ", font:"ಅ / ಅ+",
     subtitle:"ಸರಳ ಡಿಜಿಟಲ್ ಪಠಣ", section:"ಮಾಹಾತ್ಮ್ಯ", search:"ಈ ಅಧ್ಯಾಯದಲ್ಲಿ ಹುಡುಕಿ…",
     toc:"ಶ್ಲೋಕ ಆರಂಭ", count:n => `ಈ ಅಧ್ಯಾಯದಲ್ಲಿ ${n} ಶ್ಲೋಕಗಳು`, countSearch:n => `${n} ಶ್ಲೋಕಗಳು ದೊರೆತಿವೆ`,
     prev:"← ಹಿಂದಿನ ಅಧ್ಯಾಯ", next:"ಮುಂದಿನ ಅಧ್ಯಾಯ →", pager:"ಸಂಪೂರ್ಣ ಅಧ್ಯಾಯ ಒಂದೇ ಪುಟದಲ್ಲಿ",
@@ -68,12 +68,15 @@ function applyLocale() {
   const t = UI[selectedLanguage];
   document.documentElement.lang = t.htmlLang;
   document.body.dataset.lang = selectedLanguage;
+  document.getElementById("bookTitle").textContent = t.bookTitle;
+  document.querySelector(".book-card strong").textContent = t.bookTitle;
   document.getElementById("brandSubtitle").textContent = t.subtitle;
+  document.getElementById("fontBtn").textContent = t.font;
   document.getElementById("mobileBookLabel").textContent = t.bookLabel;
   document.getElementById("bookLabel").textContent = t.bookLabel;
   document.getElementById("chapterLabel").textContent = t.chapterLabel;
   document.getElementById("sectionLabel").textContent = t.section;
-  document.getElementById("breadcrumbs").textContent = `शिवमहापुराण › ${t.section}`;
+  document.getElementById("breadcrumbs").textContent = t.bookTitle + " › " + t.section;
   document.getElementById("searchInput").placeholder = t.search;
   document.getElementById("tocBtn").textContent = t.toc;
   document.getElementById("prevChapterBtn").textContent = t.prev;
