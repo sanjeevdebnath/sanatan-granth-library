@@ -1,9 +1,8 @@
 let book = null;
 let currentChapter = null;
+let languageChapter = null;
 let showMeaning = true;
 let fontStep = 0;
-let selectedLanguage = "hi";
-let languageChapter = null;
 let selectedLanguage = "hi";
 
 const digits = ["०","१","२","३","४","५","६","७","८","९"];
@@ -16,25 +15,27 @@ async function loadJSON(path) {
 }
 
 function esc(s = "") {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+async function loadLanguageChapter() {
+  languageChapter = null;
+  if (selectedLanguage !== "kn") return;
+  try {
+    languageChapter = await loadJSON(`books/shivamahapurana/mahatmya/chapter-${String(currentChapter.chapter).padStart(2,"0")}-kn.json`);
+  } catch (e) {
+    languageChapter = null;
+  }
 }
 
 function render(blocks) {
   const q = document.getElementById("searchInput").value.trim().toLowerCase();
-
-  const filtered = blocks.map(b => ({
-    ...b,
-    shlokas: b.shlokas.filter(s =>
-      !q || `${(s.lines || []).join(" ")} ${b.meaning || ""}`.toLowerCase().includes(q)
-    )
-  })).filter(b => b.shlokas.length);
-
-  const count = filtered.reduce((n, b) => n + b.shlokas.length, 0);
-  document.getElementById("verseCount").textContent =
-    q ? `${count} श्लोक मिले` : `इस अध्याय में ${count} श्लोक`;
-
   const knByVerse = {};
-  if (languageChapter) languageChapter.blocks.forEach(b => b.shlokas.forEach(s => { knByVerse[s.number] = b.meaning; }));
+  if (languageChapter) {
+    languageChapter.blocks.forEach(b => b.shlokas.forEach(s => {
+      knByVerse[s.number] = b.meaning;
+    }));
+  }
 
   const filtered = blocks.map(b => ({
     ...b,
@@ -46,21 +47,15 @@ function render(blocks) {
   const count = filtered.reduce((n, b) => n + b.shlokas.length, 0);
   document.getElementById("verseCount").textContent =
     q ? `${count} श्लोक मिले` : `इस अध्याय में ${count} श्लोक`;
-
-  if (selectedLanguage === "kn") {
-    document.getElementById("verseList").innerHTML = `
-      <article class="verse-group"><div class="verse-body">
-        <div class="meaning"><div class="meaning-label">ಕನ್ನಡ ಮೂಲ — ಅಧ್ಯಾಯ ೧</div>
-        <div>ಈ ಕನ್ನಡ ಆವೃತ್ತಿಯ ಅಧ್ಯಾಯ ೧ ಅನ್ನು ನಾವು ಈಗ ಪುಟಪುಟವಾಗಿ ಪರಿಶೀಲಿಸಿ ಶ್ಲೋಕಗಳೊಂದಿಗೆ ನಿಖರವಾಗಿ ಜೋಡಿಸುತ್ತಿದ್ದೇವೆ. ಮೂಲ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಕನ್ನಡ ಅರ್ಥದ ಜೊತೆಗೆ ಹೆಚ್ಚುವರಿ ವಿವರಣೆಗಳೂ ಇವೆ. ಪ್ರಕಟಣೆಗೆ ಮುನ್ನ ಅವುಗಳನ್ನು ದೃಷ್ಟಿ ಪರಿಶೀಲನೆ ಮಾಡಲಾಗುತ್ತದೆ.</div></div>
-      </div></article>`;
-    updateReadingFontSizes();
-    return;
-  }
 
   let lastSpeaker = null;
   document.getElementById("verseList").innerHTML = filtered.map(b => {
     const showSpeaker = b.speaker && b.speaker !== lastSpeaker;
     if (b.speaker) lastSpeaker = b.speaker;
+    const languageMeaning = selectedLanguage === "kn"
+      ? knByVerse[b.shlokas[0]?.number]
+      : b.meaning;
+
     return `
     <article class="verse-group">
       ${showSpeaker ? `<div class="verse-top"><span class="speaker">${esc(b.speaker)}</span></div>` : ""}
@@ -74,21 +69,30 @@ function render(blocks) {
               </div>
             </div>`).join("")}
         </div>
-        ${showMeaning && (selectedLanguage === "hi" ? b.meaning : knByVerse[b.shlokas[0]?.number]) ? `
+        ${showMeaning && languageMeaning ? `
           <div class="meaning">
-            <div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ ಅರ್ಥ / ವಿವರಣೆ"}</div>
-            <div>${esc(selectedLanguage === "hi" ? b.meaning : knByVerse[b.shlokas[0]?.number])}</div>
+            <div class="meaning-label">${selectedLanguage === "kn" ? "ಕನ್ನಡ ಅರ್ಥ / ವಿವರಣೆ" : "हिन्दी अर्थ"}</div>
+            <div>${esc(languageMeaning)}</div>
           </div>` : ""}
       </div>
     </article>`;
   }).join("") + (currentChapter.colophon && !q ? `
     <article class="colophon">
       <div class="colophon-sanskrit">${esc(currentChapter.colophon.sanskrit)}</div>
-      ${showMeaning ? `<div class="meaning"><div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)"}</div><div>${esc(currentChapter.colophon.meaning)}</div></div>` : ""}
+      ${showMeaning && selectedLanguage === "hi" ? `<div class="meaning"><div class="meaning-label">हिन्दी अर्थ</div><div>${esc(currentChapter.colophon.meaning)}</div></div>` : ""}
     </article>` : "");
+
+  if (selectedLanguage === "kn" && !languageChapter) {
+    document.getElementById("verseList").insertAdjacentHTML("afterbegin",
+      `<div class="verse-group"><div class="verse-body"><div class="meaning">
+      <div class="meaning-label">ಕನ್ನಡ</div>
+      <div>ಈ ಅಧ್ಯಾಯದ ಕನ್ನಡ ಪಠ್ಯ ಇನ್ನೂ ಪರಿಶೀಲನೆಯಲ್ಲಿದೆ.</div>
+      </div></div></div>`);
+  }
 
   updateReadingFontSizes();
 }
+
 function renderChapters() {
   const box = document.getElementById("chapterList");
   const chapters = book.sections[0].chapters;
@@ -111,20 +115,16 @@ function updateChapterPager() {
 
   prevBtn.disabled = index <= 0;
   nextBtn.disabled = index < 0 || index >= chapters.length - 1;
-
   prevBtn.textContent = index > 0 ? `← अध्याय ${hn(chapters[index - 1].number)}` : "← पिछला अध्याय";
   nextBtn.textContent = index < chapters.length - 1 ? `अध्याय ${hn(chapters[index + 1].number)} →` : "अगला अध्याय →";
-
-  prevBtn.setAttribute("aria-label", index > 0 ? `अध्याय ${hn(chapters[index - 1].number)} पर जाएँ` : "पिछला अध्याय उपलब्ध नहीं");
-  nextBtn.setAttribute("aria-label", index < chapters.length - 1 ? `अध्याय ${hn(chapters[index + 1].number)} पर जाएँ` : "अगला अध्याय उपलब्ध नहीं");
 }
 
 async function goToChapterByIndex(index) {
   const chapters = book.sections[0].chapters;
   if (index < 0 || index >= chapters.length) return;
-
   const c = chapters[index];
   currentChapter = await loadJSON(`books/shivamahapurana/mahatmya/${c.id}.json`);
+  await loadLanguageChapter();
   document.getElementById("chapterTitle").textContent = `अध्याय ${hn(currentChapter.chapter)}`;
   document.getElementById("chapterDescription").textContent = currentChapter.title;
   renderChapters();
@@ -139,7 +139,6 @@ function openSidebar() {
   document.getElementById("sidebarBackdrop").classList.add("show");
   document.body.classList.add("menu-open");
 }
-
 function closeSidebar() {
   document.getElementById("sidebar").classList.remove("open");
   document.getElementById("sidebarBackdrop").classList.remove("show");
@@ -149,6 +148,7 @@ function closeSidebar() {
 async function init() {
   book = await loadJSON("books/shivamahapurana/metadata.json");
   currentChapter = await loadJSON("books/shivamahapurana/mahatmya/chapter-01.json");
+  await loadLanguageChapter();
   document.getElementById("bookTitle").textContent = book.title;
   document.getElementById("chapterTitle").textContent = `अध्याय ${hn(currentChapter.chapter)}`;
   document.getElementById("chapterDescription").textContent = currentChapter.title;
@@ -161,16 +161,8 @@ document.getElementById("searchInput").oninput = () => render(currentChapter.blo
 
 document.getElementById("languageBtn").onclick = async () => {
   selectedLanguage = selectedLanguage === "hi" ? "kn" : "hi";
-  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ";
-  if (selectedLanguage === "kn" && !languageChapter) {
-    try { languageChapter = await loadJSON("books/shivamahapurana/mahatmya/chapter-01-kn.json"); }
-    catch (e) { selectedLanguage = "hi"; }
-  }
-  render(currentChapter.blocks);
-};
-document.getElementById("languageBtn").onclick = () => {
-  selectedLanguage = selectedLanguage === "hi" ? "kn" : "hi";
-  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)";
+  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी" : "ಕನ್ನಡ";
+  await loadLanguageChapter();
   render(currentChapter.blocks);
 };
 
@@ -182,59 +174,29 @@ document.getElementById("meaningBtn").onclick = () => {
 
 function updateReadingFontSizes() {
   const isMobile = window.matchMedia("(max-width: 700px)").matches;
-
-  const shlokaSizes = isMobile
-    ? ["1.28rem", "1.42rem", "1.58rem", "1.76rem"]
-    : ["1.28rem", "1.42rem", "1.58rem", "1.76rem"];
-
-  const meaningSizes = isMobile
-    ? ["21px", "23px", "25px", "27px"]
-    : ["18.24px", "20.16px", "22.40px", "24.96px"];
-
-  const shlokaSize = shlokaSizes[fontStep];
-  const meaningSize = meaningSizes[fontStep];
-
-  document.documentElement.style.setProperty("--reading", shlokaSize);
-  document.documentElement.style.setProperty("--meaning-size", meaningSize);
-
-  // Apply directly as well as through the CSS variable so desktop browsers
-  // cannot override the selected reading size with an older fixed rule.
-  document.querySelectorAll(".meaning").forEach(el => {
-    el.style.setProperty("font-size", meaningSize, "important");
-  });
+  const shlokaSizes = ["1.28rem", "1.42rem", "1.58rem", "1.76rem"];
+  const meaningSizes = isMobile ? ["21px", "23px", "25px", "27px"] : ["18.24px", "20.16px", "22.40px", "24.96px"];
+  document.documentElement.style.setProperty("--reading", shlokaSizes[fontStep]);
+  document.documentElement.style.setProperty("--meaning-size", meaningSizes[fontStep]);
+  document.querySelectorAll(".meaning").forEach(el => el.style.setProperty("font-size", meaningSizes[fontStep], "important"));
 }
-document.getElementById("fontBtn").onclick = () => {
-  fontStep = (fontStep + 1) % 4;
-  updateReadingFontSizes();
-};
-
+document.getElementById("fontBtn").onclick = () => { fontStep = (fontStep + 1) % 4; updateReadingFontSizes(); };
 window.addEventListener("resize", updateReadingFontSizes);
-updateReadingFontSizes();
-
 document.getElementById("menuBtn").onclick = () => {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+  document.getElementById("sidebar").classList.contains("open") ? closeSidebar() : openSidebar();
 };
-
 document.getElementById("sidebarBackdrop").onclick = closeSidebar;
 document.getElementById("closeMenuBtn").onclick = closeSidebar;
-
-document.getElementById("tocBtn").onclick = () =>
-  document.getElementById("verseList").scrollIntoView({behavior:"smooth"});
-
+document.getElementById("tocBtn").onclick = () => document.getElementById("verseList").scrollIntoView({behavior:"smooth"});
 document.getElementById("prevChapterBtn").onclick = async () => {
-  const chapters = book.sections[0].chapters;
-  const index = chapters.findIndex(c => c.number === currentChapter.chapter);
-  if (index > 0) await goToChapterByIndex(index - 1);
+  const i = book.sections[0].chapters.findIndex(c => c.number === currentChapter.chapter);
+  if (i > 0) await goToChapterByIndex(i - 1);
 };
-
 document.getElementById("nextChapterBtn").onclick = async () => {
-  const chapters = book.sections[0].chapters;
-  const index = chapters.findIndex(c => c.number === currentChapter.chapter);
-  if (index >= 0 && index < chapters.length - 1) await goToChapterByIndex(index + 1);
+  const i = book.sections[0].chapters.findIndex(c => c.number === currentChapter.chapter);
+  if (i >= 0 && i < book.sections[0].chapters.length - 1) await goToChapterByIndex(i + 1);
 };
-
-init().catch(e =>
-  document.getElementById("verseList").innerHTML =
-    `<div class="verse-group"><div class="verse-body">सामग्री लोड नहीं हो सकी।</div></div>`
-);
+init().catch(e => {
+  console.error(e);
+  document.getElementById("verseList").innerHTML = `<div class="verse-group"><div class="verse-body">सामग्री लोड नहीं हो सकी।</div></div>`;
+});
