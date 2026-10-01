@@ -56,7 +56,7 @@ function updateReadingFontSizes() {
 }
 
 async function loadJSON(path) {
-  const r = await fetch(path);
+  const r = await fetch(`${path}?v=20261001-kn2`);
   if (!r.ok) throw new Error(path);
   return r.json();
 }
