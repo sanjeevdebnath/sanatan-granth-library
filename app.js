@@ -3,6 +3,7 @@ let currentChapter = null;
 let showMeaning = true;
 let fontStep = 0;
 let selectedLanguage = "hi";
+let languageChapter = null;
 let selectedLanguage = "hi";
 
 const digits = ["०","१","२","३","४","५","६","७","८","९"];
@@ -20,6 +21,20 @@ function esc(s = "") {
 
 function render(blocks) {
   const q = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  const filtered = blocks.map(b => ({
+    ...b,
+    shlokas: b.shlokas.filter(s =>
+      !q || `${(s.lines || []).join(" ")} ${b.meaning || ""}`.toLowerCase().includes(q)
+    )
+  })).filter(b => b.shlokas.length);
+
+  const count = filtered.reduce((n, b) => n + b.shlokas.length, 0);
+  document.getElementById("verseCount").textContent =
+    q ? `${count} श्लोक मिले` : `इस अध्याय में ${count} श्लोक`;
+
+  const knByVerse = {};
+  if (languageChapter) languageChapter.blocks.forEach(b => b.shlokas.forEach(s => { knByVerse[s.number] = b.meaning; }));
 
   const filtered = blocks.map(b => ({
     ...b,
@@ -59,10 +74,10 @@ function render(blocks) {
               </div>
             </div>`).join("")}
         </div>
-        ${showMeaning && b.meaning ? `
+        ${showMeaning && (selectedLanguage === "hi" ? b.meaning : knByVerse[b.shlokas[0]?.number]) ? `
           <div class="meaning">
-            <div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)"}</div>
-            <div>${esc(b.meaning)}</div>
+            <div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ ಅರ್ಥ / ವಿವರಣೆ"}</div>
+            <div>${esc(selectedLanguage === "hi" ? b.meaning : knByVerse[b.shlokas[0]?.number])}</div>
           </div>` : ""}
       </div>
     </article>`;
@@ -144,9 +159,13 @@ async function init() {
 
 document.getElementById("searchInput").oninput = () => render(currentChapter.blocks);
 
-document.getElementById("languageBtn").onclick = () => {
+document.getElementById("languageBtn").onclick = async () => {
   selectedLanguage = selectedLanguage === "hi" ? "kn" : "hi";
-  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)";
+  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ";
+  if (selectedLanguage === "kn" && !languageChapter) {
+    try { languageChapter = await loadJSON("books/shivamahapurana/mahatmya/chapter-01-kn.json"); }
+    catch (e) { selectedLanguage = "hi"; }
+  }
   render(currentChapter.blocks);
 };
 document.getElementById("languageBtn").onclick = () => {
