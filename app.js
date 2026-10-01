@@ -2,6 +2,7 @@ let book = null;
 let currentChapter = null;
 let showMeaning = true;
 let fontStep = 0;
+let selectedLanguage = "hi";
 
 const digits = ["०","१","२","३","४","५","६","७","८","९"];
 const hn = n => String(n).split("").map(x => digits[Number(x)]).join("");
@@ -49,7 +50,7 @@ function render(blocks) {
         </div>
         ${showMeaning && b.meaning ? `
           <div class="meaning">
-            <div class="meaning-label">हिन्दी अर्थ</div>
+            <div class="meaning-label">${selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)"}</div>
             <div>${esc(b.meaning)}</div>
           </div>` : ""}
       </div>
@@ -132,6 +133,11 @@ async function init() {
 
 document.getElementById("searchInput").oninput = () => render(currentChapter.blocks);
 
+document.getElementById("languageBtn").onclick = () => {
+  selectedLanguage = selectedLanguage === "hi" ? "kn" : "hi";
+  document.getElementById("languageBtn").textContent = selectedLanguage === "hi" ? "हिन्दी अर्थ" : "ಕನ್ನಡ (source draft)";
+  render(currentChapter.blocks);
+};
 document.getElementById("meaningBtn").onclick = () => {
   showMeaning = !showMeaning;
   document.getElementById("meaningBtn").classList.toggle("active", showMeaning);
