@@ -32,6 +32,16 @@ function render(blocks) {
   document.getElementById("verseCount").textContent =
     q ? `${count} श्लोक मिले` : `इस अध्याय में ${count} श्लोक`;
 
+  if (selectedLanguage === "kn") {
+    document.getElementById("verseList").innerHTML = `
+      <article class="verse-group"><div class="verse-body">
+        <div class="meaning"><div class="meaning-label">ಕನ್ನಡ ಮೂಲ — ಅಧ್ಯಾಯ ೧</div>
+        <div>ಈ ಕನ್ನಡ ಆವೃತ್ತಿಯ ಅಧ್ಯಾಯ ೧ ಅನ್ನು ನಾವು ಈಗ ಪುಟಪುಟವಾಗಿ ಪರಿಶೀಲಿಸಿ ಶ್ಲೋಕಗಳೊಂದಿಗೆ ನಿಖರವಾಗಿ ಜೋಡಿಸುತ್ತಿದ್ದೇವೆ. ಮೂಲ ಸ್ಕ್ಯಾನ್‌ನಲ್ಲಿ ಕನ್ನಡ ಅರ್ಥದ ಜೊತೆಗೆ ಹೆಚ್ಚುವರಿ ವಿವರಣೆಗಳೂ ಇವೆ. ಪ್ರಕಟಣೆಗೆ ಮುನ್ನ ಅವುಗಳನ್ನು ದೃಷ್ಟಿ ಪರಿಶೀಲನೆ ಮಾಡಲಾಗುತ್ತದೆ.</div></div>
+      </div></article>`;
+    updateReadingFontSizes();
+    return;
+  }
+
   let lastSpeaker = null;
   document.getElementById("verseList").innerHTML = filtered.map(b => {
     const showSpeaker = b.speaker && b.speaker !== lastSpeaker;
