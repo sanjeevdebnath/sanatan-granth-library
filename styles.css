@@ -93,3 +93,63 @@ button,input{font:inherit}.topbar{height:72px;background:#fffdf9;border-bottom:1
   }
 }
 \nbody[data-lang="kn"]{font-family:"Noto Sans Kannada","Noto Sans Devanagari",sans-serif}\nbody[data-lang="kn"] .chapter-header h1,body[data-lang="kn"] .chapter-header p,body[data-lang="kn"] .meaning,body[data-lang="kn"] .chapter-link,body[data-lang="kn"] .side-heading,body[data-lang="kn"] .book-card,body[data-lang="kn"] .breadcrumbs,body[data-lang="kn"] .chapter-pager,body[data-lang="kn"] .search input,body[data-lang="kn"] .language-select{font-family:"Noto Sans Kannada","Noto Sans Devanagari",sans-serif}\n.language-select{min-height:42px;padding:0 30px 0 12px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:10px;cursor:pointer}\n
+
+/* v31: senior-friendly hierarchical Hindi navigation; Kannada styles above remain intact */
+.nav-group{margin-bottom:18px}
+.nav-collapse-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:52px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#f1e5d7;
+  color:var(--text);
+  padding:10px 14px;
+  box-shadow:0 2px 8px #0000000a;
+  font-family:"Noto Serif Devanagari",serif;
+  text-align:left;
+}
+.nav-group-title.nav-collapse-btn,
+.nav-khanda-title.nav-collapse-btn{
+  font-size:1rem;
+  font-weight:700;
+  color:var(--accent);
+}
+.nav-khanda-title.nav-collapse-btn{padding-top:10px}
+.nav-toggle-icon{
+  width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;
+  border-radius:50%;background:var(--surface);border:1px solid #d7c5b1;
+  color:var(--accent);font-family:Arial,sans-serif;font-size:1.35rem;font-weight:500;line-height:1;
+}
+.nav-header-text{flex:1}
+.nav-collapse-btn:hover{background:#ead8c4;color:var(--accent)}
+.nav-samhita{margin:10px 0 12px 14px}
+.nav-samhita-title.nav-collapse-btn{
+  min-height:48px;font-size:.9rem;font-weight:700;color:var(--muted);
+  background:#f7efe6;padding:8px 12px;
+}
+.nav-samhita-title.nav-collapse-btn .nav-toggle-icon{width:27px;height:27px;flex-basis:27px;font-size:1.2rem}
+.nav-collapse-content{padding:7px 0 2px}
+.nav-collapse-content[hidden]{display:none}
+.nav-chapters{padding:2px 0 4px 12px}
+.chapter-link{width:100%;min-height:48px;margin:3px 0;padding:10px 12px;border:1px solid transparent;border-radius:12px}
+.chapter-link:hover{background:#f7efe6}
+.chapter-link.active{background:#ead5bf;border-color:#dfc5a8;color:var(--accent)}
+.nav-nested{margin:10px 0 10px 18px}
+.nav-nested-title.nav-collapse-btn{
+  min-height:48px;font-size:.92rem;font-weight:700;color:var(--muted);
+  background:#f7efe6;padding:8px 12px;
+}
+.nav-nested-title.nav-collapse-btn .nav-toggle-icon{width:27px;height:27px;flex-basis:27px;font-size:1.2rem}
+.nav-nested .nav-collapse-content{padding:5px 0 2px}
+@media(max-width:760px){
+  .nav-collapse-btn{min-height:56px}
+  .nav-group-title.nav-collapse-btn,.nav-khanda-title.nav-collapse-btn{font-size:1.05rem}
+  .nav-samhita-title.nav-collapse-btn{min-height:52px;font-size:.95rem}
+  .nav-nested{margin-left:10px}
+  .nav-nested-title.nav-collapse-btn{min-height:52px;font-size:.95rem}
+  .chapter-link{min-height:52px;font-size:1rem}
+  .nav-chapters{padding-left:8px}
+}
