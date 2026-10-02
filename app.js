@@ -31,6 +31,25 @@ const UI = {
   }
 };
 
+
+const knNavTitles = {
+  "mahatmya":"ಮಾಹಾತ್ಮ್ಯ",
+  "pratham-khanda-purvardha":"ಪ್ರಥಮ-ಖಂಡ — ಪೂರ್ವಾರ್ಧ",
+  "vidyeshvara-samhita":"ಪ್ರಥಮಾ ವಿದ್ಯೇಶ್ವರಸಂಹಿತಾ",
+  "rudra-samhita":"ದ್ವಿತೀಯಾ ರುದ್ರಸಂಹಿತಾ",
+  "srishti-khanda":"೧ — ಸೃಷ್ಟಿಖಂಡ",
+  "sati-khanda":"೨ — ಸತಿಖಂಡ",
+  "parvati-khanda":"೩ — ಪಾರ್ವತಿಖಂಡ",
+  "kumar-khanda":"೪ — ಕುಮಾರಖಂಡ",
+  "yuddha-khanda":"೫ — ಯುದ್ಧಖಂಡ",
+  "pratham-khanda-uttarardha":"ಪ್ರಥಮ-ಖಂಡ — ಉತ್ತರಾರ್ಧ",
+  "dvitiya-khanda":"ದ್ವಿತೀಯ-ಖಂಡ"
+};
+function navTitle(item) {
+  if (selectedLanguage !== "kn") return item.title || "";
+  return knNavTitles[item.id] || item.knTitle || item.title || "";
+}
+
 const chapterTitles = {
   hi: {
     1:"शौनकजीके साधनविषयक प्रश्न करनेपर सूतजीका उन्हें शिवमहापुराणकी महिमा सुनाना",
@@ -41,6 +60,15 @@ const chapterTitles = {
     6:"शिवपुराणके श्रवणकी विधि",
     7:"श्रोताओंके पालन करनेयोग्य नियमोंका वर्णन"
   }
+};
+chapterTitles.kn = {
+  1:"ಶೌನಕ ಮಹರ್ಷಿಗಳ ಪ್ರಶ್ನೆಗಳಿಗೆ ಸೂತರು ಶಿವಮಹಾಪುರಾಣದ ಮಹಿಮೆಯನ್ನು ವಿವರಿಸುವುದು",
+  2:"ಶಿವಪುರಾಣ ಶ್ರವಣದಿಂದ ದೇವರಾಜನಿಗೆ ಶಿವಲೋಕದ ಪ್ರಾಪ್ತಿ",
+  3:"ಚಂಚುಳೆಗೆ ಪಾಪದ ಭಯ ಮತ್ತು ಸಂಸಾರದಿಂದ ವೈರಾಗ್ಯ",
+  4:"ಚಂಚುಳೆಯ ಪ್ರಾರ್ಥನೆಯಿಂದ ಬ್ರಾಹ್ಮಣನು ಸಂಪೂರ್ಣ ಶಿವಪುರಾಣವನ್ನು ಹೇಳುವುದು",
+  5:"ಚಂಚುಳೆಯ ಪ್ರಯತ್ನದಿಂದ ಬಿಂದುಗನ ಪಿಶಾಚ ಯೋನಿಯಿಂದ ಉದ್ಧಾರ",
+  6:"ಶಿವಪುರಾಣ ಶ್ರವಣದ ವಿಧಾನ",
+  7:"ಶ್ರೋತೃಗಳು ಪಾಲಿಸಬೇಕಾದ ನಿಯಮಗಳ ವರ್ಣನೆ"
 };
 
 async function loadJSON(path) {
@@ -67,9 +95,9 @@ function buildFlatNavigation() {
           groupId: group.id,
           groupTitle: group.title,
           sectionId: section.id,
-          sectionTitle: section.title,
+          sectionTitle: navTitle(section),
           sectionIds: ids,
-          sectionTitles: titles,
+          sectionTitles: titles.map((title, i) => navTitle({id: ids[i], title})),
           parentType: "khanda"
         });
       }
@@ -81,7 +109,7 @@ function buildFlatNavigation() {
   for (const group of navigation) {
     if (group.type === "section") {
       for (const c of group.chapters || []) {
-        items.push({...c, groupId: group.id, groupTitle: group.title, parentType: "section"});
+        items.push({...c, groupId: group.id, groupTitle: navTitle(group), parentType: "section"});
       }
     } else if (group.type === "khanda") {
       walkSections(group.sections, group);
@@ -126,9 +154,10 @@ function toggleNavSection(key) {
 
 async function loadLanguageChapter() {
   languageChapter = null;
-  if (selectedLanguage !== "kn" || !currentNav || currentNav.parentType !== "section") return;
+  if (selectedLanguage !== "kn" || !currentNav) return;
   try {
-    languageChapter = await loadJSON(`books/shivamahapurana/mahatmya/chapter-${String(currentChapter.chapter).padStart(2,"0")}-kn.json`);
+    const knPath = currentNav.path.replace(/\.json$/, "-kn.json");
+    languageChapter = await loadJSON(knPath);
   } catch (e) {
     languageChapter = null;
   }
@@ -138,7 +167,7 @@ function currentSectionLabel() {
   if (!currentNav) return selectedLanguage === "kn" ? "ಮಾಹಾತ್ಮ್ಯ" : "माहात्म्य";
   if (selectedLanguage === "kn") {
     if (currentNav.parentType === "section") return "ಮಾಹಾತ್ಮ್ಯ";
-    return currentNav.sectionTitles?.at(-1) || currentNav.sectionTitle || currentNav.groupTitle || "";
+    return navTitle({id: currentNav.sectionIds?.at(-1) || currentNav.sectionId, title: currentNav.sectionTitles?.at(-1) || currentNav.sectionTitle || currentNav.groupTitle || ""});
   }
   return currentNav.sectionTitles?.at(-1) || currentNav.groupTitle || "";
 }
@@ -170,7 +199,7 @@ function applyLocale() {
   document.getElementById("chapterDescription").textContent =
     selectedLanguage === "hi"
       ? (currentChapter.opening_subtitle || currentChapter.title || chapterTitles.hi[currentChapter.chapter] || "")
-      : (languageChapter?.title || chapterTitles.hi[currentChapter.chapter] || currentChapter.title || "");
+      : (languageChapter?.title || chapterTitles.kn[currentChapter.chapter] || currentChapter.title || "");
   document.getElementById("menuBtn").setAttribute("aria-label", selectedLanguage === "kn" ? "ಮೆನು ತೆರೆಯಿರಿ" : "मेनू खोलें");
   document.getElementById("closeMenuBtn").setAttribute("aria-label", selectedLanguage === "kn" ? "ಮೆನು ಮುಚ್ಚಿರಿ" : "मेनू बंद करें");
 }
@@ -256,7 +285,7 @@ function renderSection(section, group, level = 0) {
     <div class="${wrapperClass} ${sectionCollapsed ? "is-collapsed" : ""}">
       <button class="nav-collapse-btn ${titleClass}" data-nav-key="${esc(section.id)}" aria-expanded="${!sectionCollapsed}">
         <span class="nav-toggle-icon" aria-hidden="true">${sectionCollapsed ? "+" : "−"}</span>
-        <span class="nav-header-text">${esc(section.title)}</span>
+        <span class="nav-header-text">${esc(navTitle(section))}</span>
       </button>
       <div class="nav-collapse-content" ${sectionCollapsed ? "hidden" : ""}>
         ${chapters ? `<div class="nav-chapters">${chapters}</div>` : ""}
@@ -283,7 +312,7 @@ function renderChapters() {
       html += `<div class="nav-group nav-group-section ${groupCollapsed ? "is-collapsed" : ""}">
         <button class="nav-collapse-btn nav-group-title" data-nav-key="${esc(group.id)}" aria-expanded="${!groupCollapsed}">
           <span class="nav-toggle-icon" aria-hidden="true">${groupCollapsed ? "+" : "−"}</span>
-          <span class="nav-header-text">${esc(group.title)}</span>
+          <span class="nav-header-text">${esc(navTitle(group))}</span>
         </button>
         <div class="nav-collapse-content" ${groupCollapsed ? "hidden" : ""}>
           <div class="nav-chapters">${(group.chapters || []).map(c => chapterButton(c)).join("")}</div>
